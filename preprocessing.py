@@ -39,7 +39,9 @@ def resize(array, size, keep_ratio=False, resample=Image.LANCZOS):
         im = im.resize((size, size), resample)
     return im
 
-def convert_to_jpg(study_level_csv, img_size=512):
+def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv', 
+                    save_dir='./jpg_form', dataset_p='../siim-covid19-detection',
+                    img_size=512):
     train_csv = pd.read_csv(study_level_csv)
     image_id = []
     dim0 = []
@@ -49,10 +51,11 @@ def convert_to_jpg(study_level_csv, img_size=512):
     
 
     for split in ['test', 'train']:
-        save_dir = f'./jpg_form/{split}/'
+        save_dir = save_dir + f'/{split}/'
         os.makedirs(save_dir, exist_ok=True)
     
-    for root, dirs, filenames in tqdm(os.walk(f'../siim-covid19-detection/{split}')):
+    data_path = dataset_p + f'/{split}'
+    for root, dirs, filenames in tqdm(os.walk(data_path)):
         for file in filenames:
             # set keep_ratio=True to have original aspect ratio
             csv_id = filenames.split('/')[0] + '_study'
@@ -71,7 +74,8 @@ def convert_to_jpg(study_level_csv, img_size=512):
             splits.append(split)
             
     df = pd.DataFrame.from_dict({'id': image_id, 'dim0': dim0, 'dim1': dim1, 'label': labels, 'split': splits})
-    df.to_csv('meta.csv', index=False)
+    df.to_csv(meta_csv_p, index=False)
+    return meta_csv_p
 
 
 
