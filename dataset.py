@@ -30,7 +30,7 @@ if __name__ == '__main__':
     convert_to_jpg(train_csv_path)
     png_df = pd.read_csv(meta_csv_path)
     dataset = SiimDataset(png_df)
-    img, label = dataset[0]
-    print(img)
-    # cv2.imshow('sample', img)
-    print(label)
+    # img, label = dataset[0]
+    # print(img)
+    # # cv2.imshow('sample', img)
+    # print(label)
