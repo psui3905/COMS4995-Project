@@ -59,6 +59,7 @@ def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv',
         for file in filenames:
             # set keep_ratio=True to have original aspect ratio
             csv_id = file.split('/')[0] + '_study'
+            print(csv_id)
             id_row = train_csv.loc[train_csv['id'] == csv_id]
             id_row = id_row.loc[:, id_row.columns != 'id']
             print(id_row)
