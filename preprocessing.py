@@ -58,7 +58,7 @@ def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv',
     for root, dirs, filenames in tqdm(os.walk(data_path)):
         for file in filenames:
             # set keep_ratio=True to have original aspect ratio
-            csv_id = filenames.split('/')[0] + '_study'
+            csv_id = file.split('/')[0] + '_study'
             id_row = train_csv.loc[train_csv['id'] == csv_id]
             id_row = id_row.loc[:, id_row.columns != 'id']
             label = id_row.values.tolist()
