@@ -66,8 +66,9 @@ def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv',
             
             xray = read_xray(os.path.join(root, file))
             im = resize(xray, size=img_size)  
+            im.show()
             im.save(os.path.join(save_dir, file.replace('dcm', 'jpg')))
-
+            
             single_img_id = file.replace('.dcm', '')
             image_id.append(single_img_id)
             dim0.append(xray.shape[0])
