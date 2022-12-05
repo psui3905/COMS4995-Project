@@ -30,20 +30,20 @@ class StudyNet(nn.Module):
         )
         self.logit = nn.Linear(1280, 4)
 
-        self.mask = nn.Sequential(
-            nn.Conv2d(176, 128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, 128, kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(128, 1, kernel_size=1, padding=0),
-        )
+        # self.mask = nn.Sequential(
+        #     nn.Conv2d(176, 128, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(128),
+        #     nn.ReLU(inplace=True),
+        #     nn.Conv2d(128, 128, kernel_size=3, padding=1),
+        #     nn.BatchNorm2d(128),
+        #     nn.ReLU(inplace=True),
+        #     nn.Conv2d(128, 1, kernel_size=1, padding=0),
+        # )
         
     @torch.cuda.amp.autocast()
     def forward(self, image):
         batch_size = len(image)
-        x = 2*image-1     # ; print('input ',   x.shape)
+        x = 2*image-1     #; print('input ',   x.shape)
 
         x = self.b0(x) #; print (x.shape)  # torch.Size([2, 40, 256, 256])
         x = self.b1(x) #; print (x.shape)  # torch.Size([2, 24, 256, 256])
@@ -52,7 +52,7 @@ class StudyNet(nn.Module):
         x = self.b4(x) #; print (x.shape)  # torch.Size([2, 96, 32, 32])
         x = self.b5(x) #; print (x.shape)  # torch.Size([2, 136, 32, 32])
         #------------
-        mask = self.mask(x)
+        # mask = self.mask(x)
         #-------------
         x = self.b6(x) #; print (x.shape)  # torch.Size([2, 232, 16, 16])
         x = self.b7(x) #; print (x.shape)  # torch.Size([2, 384, 16, 16])
@@ -61,4 +61,4 @@ class StudyNet(nn.Module):
         #x = F.dropout(x, 0.5, training=self.training)
         logit = self.logit(x)
 
-        return logit, mask
+        return logit

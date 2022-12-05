@@ -23,6 +23,7 @@ class SiimDataset(Dataset):
         label = np.array(data.label)
         return image, label
         
+        
 if __name__ == '__main__':
     meta_csv_path = './meta.csv'
     train_csv_path = '../siim-covid19-detection/train_image_level.csv'

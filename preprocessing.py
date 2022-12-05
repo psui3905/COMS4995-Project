@@ -61,18 +61,24 @@ def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv',
             csv_id = file.split('/')[0] + '_study'
             id_row = train_csv.loc[train_csv['id'] == csv_id]
             id_row = id_row.loc[:, id_row.columns != 'id']
+            print(id_row)
             label = id_row.values.tolist()
             
             xray = read_xray(os.path.join(root, file))
             im = resize(xray, size=img_size)  
             im.save(os.path.join(save_dir, file.replace('dcm', 'jpg')))
 
-            image_id.append(file.replace('.dcm', ''))
+            single_img_id = file.replace('.dcm', '')
+            image_id.append(single_img_id)
             dim0.append(xray.shape[0])
             dim1.append(xray.shape[1])
             labels.append(label)
             splits.append(split)
             
+            print(f'id: {single_img_id}, label: {label}, split: {split}')
+            
+            break
+        break
     df = pd.DataFrame.from_dict({'id': image_id, 'dim0': dim0, 'dim1': dim1, 'label': labels, 'split': splits})
     df.to_csv(meta_csv_p, index=False)
     return meta_csv_p

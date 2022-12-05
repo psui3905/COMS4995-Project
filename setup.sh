@@ -22,5 +22,7 @@ conda install -c conda-forge fish
 conda create --name siimcovid python=3.9.2
 conda activate siimcovid
 
+pip3 install --ignore-installed certifi
+
 ## Clone newest repo
 git clone https://github.com/psui3905/COMS4995-Project.git
