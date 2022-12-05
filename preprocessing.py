@@ -55,7 +55,7 @@ def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv',
         os.makedirs(save_dir, exist_ok=True)
     
     data_path = dataset_p + f'/{split}'
-    for root, dirs, filenames in tqdm(os.walk(data_path)):
+    for root, dirs, filenames in os.walk(data_path):
         for file in filenames:
             # set keep_ratio=True to have original aspect ratio
             csv_id = file.split('/')[0] + '_study'
@@ -66,7 +66,6 @@ def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv',
             
             xray = read_xray(os.path.join(root, file))
             im = resize(xray, size=img_size)  
-            im.show()
             im.save(os.path.join(save_dir, file.replace('dcm', 'jpg')))
             
             single_img_id = file.replace('.dcm', '')
