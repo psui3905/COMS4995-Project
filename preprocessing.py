@@ -78,7 +78,6 @@ def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv',
             print(f'id: {single_img_id}, label: {label}, split: {split}')
             
             break
-        break
     df = pd.DataFrame.from_dict({'id': image_id, 'dim0': dim0, 'dim1': dim1, 'label': labels, 'split': splits})
     df.to_csv(meta_csv_p, index=False)
     return meta_csv_p
