@@ -39,11 +39,12 @@ def resize(array, size, keep_ratio=False, resample=Image.LANCZOS):
         im = im.resize((size, size), resample)
     return im
 
-def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv', 
+def convert_to_jpg(study_level_csv='../siim-covid19-detection/train_study_level.csv', meta_csv_p='./meta.csv', 
                     save_dir='./jpg_form', dataset_p='../siim-covid19-detection',
                     img_size=512):
     train_csv = pd.read_csv(study_level_csv)
     image_id = []
+    origin_id = []
     dim0 = []
     dim1 = []
     splits = []
@@ -51,35 +52,39 @@ def convert_to_jpg(study_level_csv, meta_csv_p='./meta.csv',
     
 
     for split in ['test', 'train']:
-        save_dir = save_dir + f'/{split}/'
-        os.makedirs(save_dir, exist_ok=True)
+        img_save_dir = save_dir + f'/{split}/'
+        os.makedirs(img_save_dir, exist_ok=True)
     
-    data_path = dataset_p + f'/{split}'
-    for root, dirs, filenames in os.walk(data_path):
-        for file in filenames:
-            # set keep_ratio=True to have original aspect ratio
-            csv_id = file.split('/')[0] + '_study'
-            print(csv_id)
-            id_row = train_csv.loc[train_csv['id'] == csv_id]
-            id_row = id_row.loc[:, id_row.columns != 'id']
-            print(id_row)
-            label = id_row.values.tolist()
-            
-            xray = read_xray(os.path.join(root, file))
-            im = resize(xray, size=img_size)  
-            im.save(os.path.join(save_dir, file.replace('dcm', 'jpg')))
-            
-            single_img_id = file.replace('.dcm', '')
-            image_id.append(single_img_id)
-            dim0.append(xray.shape[0])
-            dim1.append(xray.shape[1])
-            labels.append(label)
-            splits.append(split)
-            
-            print(f'id: {single_img_id}, label: {label}, split: {split}')
-            
-            break
-    df = pd.DataFrame.from_dict({'id': image_id, 'dim0': dim0, 'dim1': dim1, 'label': labels, 'split': splits})
+        data_path = dataset_p + f'/{split}'
+        for root, dirs, filenames in tqdm(os.walk(data_path)):
+            for file in filenames:
+                # set keep_ratio=True to have original aspect ratio
+                #print(f'{root}')
+                csv_id = root.split('/')[-2] + '_study'
+                #print(csv_id)
+                id_row = train_csv.loc[train_csv['id'] == csv_id]
+                #print(id_row)
+                id_row = id_row.loc[:, id_row.columns != 'id']
+                #print(id_row)
+                label = id_row.values.tolist()
+                
+                xray = read_xray(os.path.join(root, file))
+                im = resize(xray, size=img_size)  
+                img_save_path = os.path.join(img_save_dir, file.replace('dcm', 'jpg'))
+                im.save(img_save_path)
+                #print(img_save_path)
+                
+                single_img_id = file.replace('.dcm', '')
+                image_id.append(single_img_id)
+                origin_id.append(csv_id)
+                dim0.append(xray.shape[0])
+                dim1.append(xray.shape[1])
+                labels.append(label)
+                splits.append(split)
+                
+                #print(f'id: {single_img_id}, origin: {csv_id}, label: {label}, split: {split}')
+                
+    df = pd.DataFrame.from_dict({'id': image_id, 'origin_train_id': origin_id, 'dim0': dim0, 'dim1': dim1, 'label': labels, 'split': splits})
     df.to_csv(meta_csv_p, index=False)
     return meta_csv_p
 

@@ -26,7 +26,7 @@ class SiimDataset(Dataset):
         
 if __name__ == '__main__':
     meta_csv_path = './meta.csv'
-    train_csv_path = '../siim-covid19-detection/train_image_level.csv'
+    train_csv_path = '../siim-covid19-detection/train_study_level.csv'
     convert_to_jpg(train_csv_path)
     png_df = pd.read_csv(meta_csv_path)
     dataset = SiimDataset(png_df)
