@@ -3,6 +3,7 @@ import os, pydicom
 import pandas as pd 
 import numpy as np
 
+from file import *
 from PIL import Image
 from tqdm.auto import tqdm
 from pydicom.pixel_data_handlers.util import apply_voi_lut
@@ -87,6 +88,40 @@ def convert_to_jpg(study_level_csv='../siim-covid19-detection/train_study_level.
     df = pd.DataFrame.from_dict({'id': image_id, 'origin_train_id': origin_id, 'dim0': dim0, 'dim1': dim1, 'label': labels, 'split': splits})
     df.to_csv(meta_csv_p, index=False)
     return meta_csv_p
+    
+    
+    
+    
+def make_fold(mode='train', fold=4, data_dir='./jpg_form'):
+    if 'train' in mode:
+        df_study = pd.read_csv(data_dir+'/meta.csv')
+        df_fold  = pd.read_csv(data_dir+'/df_fold_rand830.csv')
+        df_meta  = pd.read_csv(data_dir+'/df_meta.csv')
+    
+        df_study.loc[:, 'origin_train_id'] = df_study.origin_train_id.str.replace('_study', '')
+        df_study = df_study.rename(columns={'origin_train_id': 'study_id'})
+        
+        #---
+        df = df_study.copy()
+        df = df.merge(df_fold, on='study_id')
+        # df = df.merge(df_meta, left_on='study_id', right_on='study')
+    
+        duplicate = read_list_from_file(data_dir + '/duplicate.txt')
+        df = df[~df['id'].isin(duplicate)]
+    
+        #---
+        fold = int(mode[-1])
+        df_train = df[df.fold != fold].reset_index(drop=True)
+        df_valid = df[df.fold == fold].reset_index(drop=True)
+        return df_train, df_valid
+
+    if 'test' in mode:
+        df_meta  = pd.read_csv(data_dir+'/meta.csv')
+        df_valid = df_meta[df_meta['split']=='test'].copy()
+    
+        df_valid = df_valid.assign(label=[0,0,0,0])
+        df_valid = df_valid.reset_index(drop=True)
+        return df_valid
 
 
 

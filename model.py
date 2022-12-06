@@ -2,6 +2,7 @@
 from timm.models.efficientnet import *
 from torch.nn.parallel.data_parallel import data_parallel
 from torch.nn.utils.rnn import *
+from torchsummary import summary
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,11 +11,11 @@ class StudyNet(nn.Module):
     def __init__(self):
         super(StudyNet, self).__init__()
 
-        e = tf_efficientnetv2_m_in21ft1k(pretrained=False)
+        # e = tf_efficientnetv2_m_in21ft1k(pretrained=True)
+        e = efficientnet_b3a(pretrained=True, drop_rate=0.3, drop_path_rate=0.2)
         self.b0 = nn.Sequential(
             e.conv_stem,
-            e.bn1,
-            e.act1,
+            e.bn1
         )
         self.b1 = e.blocks[0]
         self.b2 = e.blocks[1]
@@ -25,10 +26,9 @@ class StudyNet(nn.Module):
         self.b7 = e.blocks[6]
         self.b8 = nn.Sequential(
             e.conv_head, #384, 1536
-            e.bn2,
-            e.act2,
+            e.bn2
         )
-        self.logit = nn.Linear(1280, 4)
+        self.logit = nn.Linear(1536, 4)
 
         # self.mask = nn.Sequential(
         #     nn.Conv2d(176, 128, kernel_size=3, padding=1),
@@ -62,3 +62,23 @@ class StudyNet(nn.Module):
         logit = self.logit(x)
 
         return logit
+        
+        
+def run_check_net():
+    batch_size = 2
+    C, H, W = 3, 512, 512
+    #C, H, W = 3, 640, 640
+    image = torch.randn(batch_size, C, H, W)
+    # mask  = torch.randn(batch_size, num_study_label, H, W).cuda()
+
+    net = StudyNet()
+    logit = net(image)
+
+    print(image.shape)
+    print(logit.shape)
+    # print(mask.shape)
+
+
+# main #################################################################
+if __name__ == '__main__':
+    run_check_net()

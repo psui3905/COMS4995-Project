@@ -1,17 +1,20 @@
 import torch, cv2
 import numpy as np
 import pandas as pd
+import albumentations as A
 from torch.utils.data.dataset import Dataset
-from torch.utils.data import DataLoader
 from torch.utils.data.sampler import *
+from albumentations.pytorch.transforms import *
 
 from preprocessing import *
 
 class SiimDataset(Dataset):
-    def __init__(self, df: pd.DataFrame):
+    def __init__(self, df: pd.DataFrame, root_dir='./jpg_form', transform=None):
         super().__init__()
         self.df = df
         self.length = len(df)
+        self.root_dir = root_dir
+        self.transform = transform
     
     def __len__(self):
         return self.length 
@@ -19,18 +22,14 @@ class SiimDataset(Dataset):
     def __getitem__(self, index):
         # default img size used: 512x512
         data = self.df.iloc[index]
-        image = cv2.imread('train/' + data.id + '.jpg')
-        label = np.array(data.label)
-        return image, label
+        img_path = os.path.join(self.root_dir, 'train', data.id + '.jpg')
+        image = cv2.imread(img_path)
+        landmarks = data.label.strip('[]').split(', ')
+        landmarks = np.array(landmarks).astype(np.float)
+        landmarks = torch.from_numpy(landmarks)
         
+        if self.transform:
+            image = self.transform(image=image)['image']
+        return image, landmarks
         
-if __name__ == '__main__':
-    meta_csv_path = './meta.csv'
-    train_csv_path = '../siim-covid19-detection/train_study_level.csv'
-    convert_to_jpg(train_csv_path)
-    png_df = pd.read_csv(meta_csv_path)
-    dataset = SiimDataset(png_df)
-    # img, label = dataset[0]
-    # print(img)
-    # # cv2.imshow('sample', img)
-    # print(label)
+
