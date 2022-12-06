@@ -6,6 +6,7 @@ from torchsummary import summary
 
 import torch.nn as nn
 import torch.nn.functional as F
+import torch
 
 class StudyNet(nn.Module):
     def __init__(self):

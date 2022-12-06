@@ -6,10 +6,9 @@ from preprocessing import *
 
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms, datasets
-from torch.utils.data import *
+from torch.utils.data import DataLoader
 
 from madgrad import MADGRAD
-from time import Timer
 
 import torch, cv2
 import numpy as np
@@ -28,7 +27,7 @@ iter_log    = 200
 iter_valid  = 200
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-
+print(f'device={device}')
 
 def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
     jpg_df = pd.read_csv(meta_csv_path)
@@ -79,7 +78,7 @@ def do_valid(model, valid_loader, epoch, batch):
     val_bsize = len(valid_loader)
     
     for t, (image, label) in enumerate(valid_loader):
-        image, label = image.cuda(device), label.cuda(device, dtype=torch.float)
+        image, label = image.to(device), label.to(device, dtype=torch.float)
         with torch.no_grad():
             logit = model(image)
             loss = F.cross_entropy(logit, label)
@@ -97,7 +96,6 @@ def do_valid(model, valid_loader, epoch, batch):
     
 def train(model, train_loader, valid_loader):
     rate, epoch = 0, 0
-    start_timer = Timer()
     
     optimizer = MADGRAD(filter(lambda p: p.requires_grad, model.parameters()), 
                         lr=start_lr, 
@@ -107,7 +105,7 @@ def train(model, train_loader, valid_loader):
                         
     for iteration in range(num_iteration):
         for t, (image, label) in enumerate(train_loader):
-            image, label = image.cuda(device), label.cuda(device, dtype=torch.float)
+            image, label = image.to(device), label.to(device, dtype=torch.float)
             model.train()
             optimizer.zero_grad()
             logit = model(image)

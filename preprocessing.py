@@ -110,7 +110,6 @@ def make_fold(mode='train', fold=4, data_dir='./jpg_form'):
         df = df[~df['id'].isin(duplicate)]
     
         #---
-        fold = int(mode[-1])
         df_train = df[df.fold != fold].reset_index(drop=True)
         df_valid = df[df.fold == fold].reset_index(drop=True)
         return df_train, df_valid
