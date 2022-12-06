@@ -30,8 +30,8 @@ class SiimDataset(Dataset):
         
         if self.transform:
             image = self.transform(image=image)['image']
-        
-        image = np.moveaxis(image, -1, 0)
+        else: 
+            image = np.transpose(image, (2, 0, 1))
         return image, landmarks
         
 if __name__=='__main__':

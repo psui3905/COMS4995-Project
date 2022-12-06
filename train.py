@@ -24,7 +24,7 @@ valid_batch_size = 16
 start_lr   = 1e-4
 num_iteration = 12000
 iter_log    = 200
-iter_valid  = 200
+iter_valid  = 20
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f'device={device}')
