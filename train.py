@@ -117,6 +117,7 @@ def do_valid(model, valid_loader, epoch, batch, optimizer):
     log.write(f'{epoch}, {batch}, {valid_acc}, {valid_loss}\n')
     
     print(f'[Epoch {epoch}|{batch}] val_acc: {valid_acc:.3f} | val_loss: {valid_loss:.3f}')
+    global best_acc
     if valid_acc > best_acc or best_acc == 0:
         best_acc = valid_acc
         if epoch % iter_log == 0 and epoch > 5:
