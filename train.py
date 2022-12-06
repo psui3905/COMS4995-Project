@@ -120,7 +120,7 @@ def do_valid(model, valid_loader, epoch, batch, optimizer):
     global best_acc
     if valid_acc > best_acc or best_acc == 0:
         best_acc = valid_acc
-        if epoch % iter_log == 0 and epoch > 5:
+        if epoch % iter_log == 0 and epoch >= 5:
             torch.save({
                 'state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
