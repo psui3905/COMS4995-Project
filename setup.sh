@@ -22,9 +22,13 @@ conda install -c conda-forge fish
 conda create --name siimcovid python=3.9.2
 conda activate siimcovid
 
-pip3 install --ignore-installed certifi
+# According to CUDA version (V100 on Google cloud, CUDA=11.6)
+conda install libgcc gmp
+conda install pytorch torchvision torchaudio pytorch-cuda=11.6 -c pytorch -c nvidia
+
+pip3 install certifi
 pip3 install -U albumentations
-pip3 install madgrad
+pip3 install madgrad opencv-python
 
 
 # download dataset

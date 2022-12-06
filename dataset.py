@@ -30,6 +30,11 @@ class SiimDataset(Dataset):
         
         if self.transform:
             image = self.transform(image=image)['image']
+        
+        image = np.moveaxis(image, -1, 0)
         return image, landmarks
         
-
+if __name__=='__main__':
+    df_train, df_valid = make_fold(mode='train', fold=1)
+    dataset = SiimDataset(df_train)
+    image, landmarks = dataset.__getitem__(0)

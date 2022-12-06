@@ -30,8 +30,8 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f'device={device}')
 
 def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
-    jpg_df = pd.read_csv(meta_csv_path)
-    train_df = jpg_df.loc[jpg_df['split'] == 'train']
+    # jpg_df = pd.read_csv(meta_csv_path)
+    # train_df = jpg_df.loc[jpg_df['split'] == 'train']
     
     train_transform = A.Compose([
         A.RandomCrop(width=512, height=512),
