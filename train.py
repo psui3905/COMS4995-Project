@@ -93,7 +93,7 @@ def do_valid(model, valid_loader, epoch, batch):
             probability = F.softmax(logit,-1).cpu().data.numpy()
             probability = np.argmax(probability, axis=-1)
             label_copy = label.cpu().data.numpy()
-            label = np.argmax(label, axis=-1)
+            label_copy = np.argmax(label_copy, axis=-1)
             print(f'prob: {probability}\nlabel: {label}')
             correct += sum(probability == label_copy)
             total_loss += loss
