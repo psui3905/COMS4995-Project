@@ -24,7 +24,7 @@ valid_batch_size = 16
 start_lr   = 1e-4
 num_iteration = 12000
 iter_log    = 200
-iter_valid  = 20
+iter_valid  = 100
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f'device={device}')
@@ -85,16 +85,16 @@ def do_valid(model, valid_loader, epoch, batch):
     
     for t, (image, label) in enumerate(valid_loader):
         image, label = image.to(device), label.to(device, dtype=torch.float)
-        print(f'Valid | image: {image.shape}, label: {label.shape}')
+        # print(f'Valid | image: {image.shape}, label: {label.shape}')
         with torch.no_grad():
             logit = model(image)
             loss = F.cross_entropy(logit, label)
-            print(f'logit.shape: {logit.shape}')
+            # print(f'logit.shape: {logit.shape}')
             probability = F.softmax(logit,-1).cpu().data.numpy()
             probability = np.argmax(probability, axis=-1)
             label_copy = label.cpu().data.numpy()
             label_copy = np.argmax(label_copy, axis=-1)
-            print(f'prob: {probability}\nlabel: {label}')
+            # print(f'prob: {probability}\nlabel: {label}')
             correct += sum(probability == label_copy)
             total_loss += loss
     
@@ -114,7 +114,7 @@ def train(model, train_loader, valid_loader):
     for iteration in range(num_iteration):
         for t, (image, label) in enumerate(train_loader):
             image, label = image.to(device), label.to(device, dtype=torch.float)
-            print(f'train | image: {image.shape}, label: {label.shape}')
+            # print(f'train | image: {image.shape}, label: {label.shape}')
             model.train()
             optimizer.zero_grad()
             logit = model(image)
