@@ -44,9 +44,15 @@ def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
         A.Normalize(mean=[0.5, 0.5, 0.5],std=[0.225, 0.225, 0.225]),
         ToTensorV2()
     ])
+    
+    valid_transform = A.Compose([
+        A.Normalize(mean=[0.5, 0.5, 0.5],std=[0.225, 0.225, 0.225]),
+        ToTensorV2()
+    ])
+    
     df_train, df_valid = make_fold(mode='train', fold=fold)
     train_dataset = SiimDataset(df_train, transform=train_transform)
-    valid_dataset = SiimDataset(df_valid)
+    valid_dataset = SiimDataset(df_valid, transform=valid_transform)
     
     train_loader = DataLoader(
         train_dataset,
@@ -79,6 +85,7 @@ def do_valid(model, valid_loader, epoch, batch):
     
     for t, (image, label) in enumerate(valid_loader):
         image, label = image.to(device), label.to(device, dtype=torch.float)
+        print(f'Valid | image: {image.shape}, label: {label.shape}')
         with torch.no_grad():
             logit = model(image)
             loss = F.cross_entropy(logit, label)
@@ -106,6 +113,7 @@ def train(model, train_loader, valid_loader):
     for iteration in range(num_iteration):
         for t, (image, label) in enumerate(train_loader):
             image, label = image.to(device), label.to(device, dtype=torch.float)
+            print(f'train | image: {image.shape}, label: {label.shape}')
             model.train()
             optimizer.zero_grad()
             logit = model(image)
