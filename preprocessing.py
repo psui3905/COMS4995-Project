@@ -111,8 +111,11 @@ def make_fold(mode='train', fold=4, data_dir='./jpg_form'):
     
         #---
         df_train = df[df.fold != fold].reset_index(drop=True)
-        df_valid = df[df.fold == fold].reset_index(drop=True)
-        return df_train, df_valid
+        df_rest = df[df.fold == fold].reset_index(drop=True)
+        middle = df_rest.size // 2
+        df_valid = df_rest.iloc[:middle, :]
+        df_test = df_rest.iloc[middle:, :]
+        return df_train, df_valid, df_test
 
     if 'test' in mode:
         df_meta  = pd.read_csv(data_dir+'/meta.csv')

@@ -23,11 +23,15 @@ train_batch_size = 8
 valid_batch_size = 16
 start_lr   = 1e-4
 num_iteration = 12000
-iter_log    = 200
+iter_log    = 10
 iter_valid  = 100
+
+best_acc = 0
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f'device={device}')
+log = Logger()
+log.open('./log.train.txt', mode='a+')
 
 def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
     # jpg_df = pd.read_csv(meta_csv_path)
@@ -50,9 +54,11 @@ def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
         ToTensorV2()
     ])
     
-    df_train, df_valid = make_fold(mode='train', fold=fold)
+    df_train, df_valid, df_test = make_fold(mode='train', fold=fold)
     train_dataset = SiimDataset(df_train, transform=train_transform)
     valid_dataset = SiimDataset(df_valid, transform=valid_transform)
+    test_dataset = SiimDataset(df_test, transform=valid_transform)
+    
     
     train_loader = DataLoader(
         train_dataset,
@@ -72,11 +78,20 @@ def create_siim_dataloader(meta_csv_path='./jpg_form/meta.csv'):
         num_workers = 4,
         pin_memory  = True
     )
+    
+    test_loader  = DataLoader(
+        test_dataset,
+        sampler = SequentialSampler(valid_dataset),
+        batch_size  = valid_batch_size,
+        drop_last   = False,
+        num_workers = 4,
+        pin_memory  = True
+    )
         
-    return train_loader, valid_loader
+    return train_loader, valid_loader, test_loader
     
 
-def do_valid(model, valid_loader, epoch, batch):
+def do_valid(model, valid_loader, epoch, batch, optimizer):
     model.eval()
     start_t = timer()
     correct, total_loss = 0, 0
@@ -97,10 +112,19 @@ def do_valid(model, valid_loader, epoch, batch):
             # print(f'prob: {probability}\nlabel: {label}')
             correct += sum(probability == label_copy)
             total_loss += loss
+    valid_acc = correct/val_size
+    valid_loss = total_loss/val_bsize
+    log.write(f'{epoch}, {batch}, {valid_acc}, {valid_loss}\n')
     
-    print(f'[Epoch {epoch}|{batch}] val_acc: {correct/val_size:.3f} | val_loss: {total_loss/val_bsize:.3f}')
-    
-    
+    print(f'[Epoch {epoch}|{batch}] val_acc: {valid_acc:.3f} | val_loss: {valid_loss:.3f}')
+    if valid_acc > best_acc or best_acc == 0:
+        best_acc = valid_acc
+        if epoch % iter_log == 0 and epoch > 5:
+            torch.save({
+                'state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'iteration': epoch
+            }, './checkpoint/%08d_model.pth' % (epoch))
     
 def train(model, train_loader, valid_loader):
     rate, epoch = 0, 0
@@ -123,13 +147,18 @@ def train(model, train_loader, valid_loader):
             optimizer.step()
             
             if t % iter_valid == 0 and t:
-                do_valid(model=model, valid_loader=valid_loader, epoch=iteration, batch=t)
+                do_valid(model=model, 
+                        valid_loader=valid_loader, 
+                        epoch=iteration, 
+                        batch=t, 
+                        optimizer=optimizer)
 
 
 
 if __name__ == '__main__':
-    train_loader, valid_laoder = create_siim_dataloader()
+    train_loader, valid_laoder, test_loader = create_siim_dataloader()
     model = StudyNet()
     model = model.to(device)
     train(model, train_loader, valid_laoder)
+    
     
