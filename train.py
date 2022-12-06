@@ -90,7 +90,7 @@ def do_valid(model, valid_loader, epoch, batch):
             logit = model(image)
             loss = F.cross_entropy(logit, label)
             print(f'logit.shape: {logit.shape}')
-            probability = F.softmax(logit,-1).cpu().data
+            probability = F.softmax(logit,-1).cpu().data.numpy()
             probability = np.argmax(probability, axis=-1)
             label = np.argmax(label, axis=-1)
             label_copy = label.cpu().data.numpy()
